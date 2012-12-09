@@ -14,6 +14,8 @@
     }
 
     var puzzle = {
+        playground: null,
+        baseImage: null,
         $viewport: null,
         image: new Image(),
         shuffle: function() {
@@ -26,13 +28,10 @@
         },
         init: function(viewport) {
             this.$viewport = $(viewport);
-            console.log("I was called", this.$viewport);
-            //this.$viewport.hide();
-
-
-
-
-
+            this.baseImage = this.$viewport.find('img')[0];
+            $(this.baseImage).hide();
+            this.playground = this.$viewport.find("#playground")[0].getContext('2d');
+            this.playground.drawImage(this.baseImage,0,0);
         }
     }
 
