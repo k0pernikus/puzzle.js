@@ -302,3 +302,15 @@ canvas {
   vertical-align: bottom;
   /** border:1px solid black; **/
 }
+
+html,body{
+  width:100%;
+  height:100%
+}
+
+.puzzlejs_viewport {
+  position: relative;
+  width:100%;
+  height:100%;
+  border:10px solid black;
+}

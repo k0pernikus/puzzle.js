@@ -42,8 +42,8 @@
             console.log(this.correctCoordinates);
         },
         randomize: function() {
-            var x = this.getRandomNumberInRange(0, 1024);
-            var y = this.getRandomNumberInRange(0, 768);
+            var x = this.getRandomNumberInRange(this.size.width, 900) - this.size.width;
+            var y = this.getRandomNumberInRange(this.size.height, 500) - this.size.height;
 
             this.moveToPosition(x, y);
         },
@@ -68,7 +68,7 @@
                 that.moveToCorrectPosition();
             });
         },
-        init: function(x, y, tileSizeInPixels) {
+        init: function(x, y, tileSizeInPixels, $viewport) {
             this.position = Object.create(this.position);
             this.coordinates = Object.create(this.coordinates);
             this.correctCoordinates = Object.create(this.coordinates);
@@ -82,7 +82,7 @@
             this.canvas.height = this.size.height;
             this.$canvas = $(this.canvas);
 
-            document.body.appendChild(this.canvas);
+            $viewport[0].appendChild(this.canvas);
 
             this.coordinates = this.$canvas.position();
             this.bind();
@@ -90,7 +90,6 @@
     }
 
     var puzzle = {
-        playgroundCtx: null,
         baseImage: null,
         size: {
             columns: 5,
@@ -105,7 +104,7 @@
                 for (var x = 0; x < numColsToCut; ++x) {
                     var tile = Object.create(tileProperty);
                     tile.position = Object.create(tileProperty.position);
-                    tile.init(x, y, tileSize);
+                    tile.init(x, y, tileSize, this.$viewport);
                     tile.fillImage(image, x, y, tileSize);
                     this.tiles.push(tile);
                     tile = null;
