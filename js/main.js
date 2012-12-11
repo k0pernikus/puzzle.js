@@ -1,5 +1,13 @@
 (function puzzle($) {
     var tileProperty = {
+        correctCoordinates: {
+            x:null,
+            y:null
+        },
+        coordinates: {
+            x:null,
+            y:null
+        },
         position: {
             x: null,
             y: null
@@ -20,17 +28,38 @@
             var ctx = this.canvas.getContext('2d');
             ctx.drawImage(image, x * this.size.width, y * this.size.height, this.size.width, this.size.height, 0, 0, this.canvas.width, this.canvas.height);
         },
+        getRandomNumberInRange: function(LowerRange, UpperRange) {
+            return Math.floor(Math.random() * (UpperRange - LowerRange + 1)) + LowerRange;
+        },
+        randomize: function() {
+
+
+
+        },
         bind: function() {
             var that = this;
             $(this.canvas).bind('click', function() {
-                console.log(that.position, that.x, that.y);
+                console.log(that.position, that.x, that.y, $(this).position());
+            });
+
+            $(document).bind('randomize', function() {
+                var x = that.getRandomNumberInRange(0, 1024);
+                var y = that.getRandomNumberInRange(0, 768);
+
+                var x = x.toString() + "px";
+                var y = y.toString() + "px"
+
+                $(that.canvas).css({"position":"absolute","left":x,"top":y});
             });
         },
-        init: function(x, y, size) {
+        init: function(x, y, tileSizeInPixels) {
             this.position = Object.create(this.position);
+            this.coordinates= Object.create(this.coordinates);
+            this.correctCoordinates = Object.create(this.coordinates);
+
             this.position.x = x;
             this.position.y = y;
-            this.size = size;
+            this.size = tileSizeInPixels;
 
             this.canvas = document.createElement('canvas');
             this.canvas.width = this.size.width;
@@ -38,6 +67,8 @@
 
             document.body.appendChild(this.canvas);
 
+            this.coordinates = $(this.canvas).position();
+            this.correctCoordinates = Object.create(this.coordinates);
             this.bind();
         }
     }
@@ -89,5 +120,7 @@
             var p = Object.create(puzzle);
             p.init(this);
         });
+
+        $(document).trigger("randomize");
     });
 }(jQuery));

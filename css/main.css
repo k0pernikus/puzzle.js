@@ -298,6 +298,7 @@ textarea {
 }
 
 canvas {
+  position:absolute;
   vertical-align: bottom;
   border:1px solid black;
 }
