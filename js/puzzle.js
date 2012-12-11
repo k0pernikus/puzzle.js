@@ -92,8 +92,8 @@
     var puzzle = {
         baseImage: null,
         size: {
-            columns: 5,
-            rows: 5
+            columns: 10,
+            rows: 10
         },
         tiles: [],
         $viewport: null,
