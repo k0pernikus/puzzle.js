@@ -296,3 +296,8 @@ textarea {
         page-break-after: avoid;
     }
 }
+
+canvas {
+  vertical-align: bottom;
+  border:1px solid black;
+}
