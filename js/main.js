@@ -32,9 +32,13 @@
             return Math.floor(Math.random() * (UpperRange - LowerRange + 1)) + LowerRange;
         },
         randomize: function() {
+            var x = this.getRandomNumberInRange(0, 1024);
+            var y = this.getRandomNumberInRange(0, 768);
 
+            var x = x.toString() + "px";
+            var y = y.toString() + "px"
 
-
+            $(this.canvas).css({"position":"absolute","left":x,"top":y});
         },
         bind: function() {
             var that = this;
@@ -43,13 +47,7 @@
             });
 
             $(document).bind('randomize', function() {
-                var x = that.getRandomNumberInRange(0, 1024);
-                var y = that.getRandomNumberInRange(0, 768);
-
-                var x = x.toString() + "px";
-                var y = y.toString() + "px"
-
-                $(that.canvas).css({"position":"absolute","left":x,"top":y});
+                that.randomize();
             });
         },
         init: function(x, y, tileSizeInPixels) {
@@ -121,6 +119,7 @@
             p.init(this);
         });
 
+        $(document).trigger("preRandomize");
         $(document).trigger("randomize");
     });
 }(jQuery));
