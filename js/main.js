@@ -1,12 +1,14 @@
 (function puzzle($) {
+    var $document = $(document);
+
     var tileProperty = {
         correctCoordinates: {
-            x:null,
-            y:null
+            x: null,
+            y: null
         },
         coordinates: {
-            x:null,
-            y:null
+            x: null,
+            y: null
         },
         position: {
             x: null,
@@ -18,6 +20,7 @@
         },
         neighbors: [],
         canvas: null,
+        $canvas: null,
         addNeighbor: function(tile) {
             this.neighbors.push(tile);
         },
@@ -31,28 +34,43 @@
         getRandomNumberInRange: function(LowerRange, UpperRange) {
             return Math.floor(Math.random() * (UpperRange - LowerRange + 1)) + LowerRange;
         },
+        preRandomize: function() {
+            var x = this.position.x * this.size.width;
+            var y = this.position.y * this.size.height;
+
+            this.correctCoordinates = {x: x, y: y};
+            console.log(this.correctCoordinates);
+        },
         randomize: function() {
             var x = this.getRandomNumberInRange(0, 1024);
             var y = this.getRandomNumberInRange(0, 768);
 
-            var x = x.toString() + "px";
-            var y = y.toString() + "px"
-
-            $(this.canvas).css({"position":"absolute","left":x,"top":y});
+            this.moveToPosition(x, y);
+        },
+        moveToPosition: function(left, top) {
+            this.$canvas.animate({top: top.toString() + "px", left: left.toString() + "px"});
+        },
+        moveToCorrectPosition: function() {
+            this.moveToPosition(this.correctCoordinates.x, this.correctCoordinates.y);
         },
         bind: function() {
             var that = this;
-            $(this.canvas).bind('click', function() {
-                console.log(that.position, that.x, that.y, $(this).position());
+            this.$canvas.bind('click', function() {
             });
 
             $(document).bind('randomize', function() {
+                that.preRandomize();
+                that.moveToCorrectPosition();
                 that.randomize();
+            });
+
+            $(document).bind('solve', function() {
+                that.moveToCorrectPosition();
             });
         },
         init: function(x, y, tileSizeInPixels) {
             this.position = Object.create(this.position);
-            this.coordinates= Object.create(this.coordinates);
+            this.coordinates = Object.create(this.coordinates);
             this.correctCoordinates = Object.create(this.coordinates);
 
             this.position.x = x;
@@ -62,11 +80,11 @@
             this.canvas = document.createElement('canvas');
             this.canvas.width = this.size.width;
             this.canvas.height = this.size.height;
+            this.$canvas = $(this.canvas);
 
             document.body.appendChild(this.canvas);
 
-            this.coordinates = $(this.canvas).position();
-            this.correctCoordinates = Object.create(this.coordinates);
+            this.coordinates = this.$canvas.position();
             this.bind();
         }
     }
@@ -81,10 +99,7 @@
         tiles: [],
         $viewport: null,
         image: new Image(),
-        shuffle: function() {
-            /* make a mess :D */
-        },
-        cutImageUp: function(numColsToCut, numRowsToCut, image) {
+        cutImageIntoTiles: function(numColsToCut, numRowsToCut, image) {
             var tileSize = this.calculateTileSize(image, numColsToCut, numRowsToCut);
             for (var y = 0; y < numRowsToCut; ++y) {
                 for (var x = 0; x < numColsToCut; ++x) {
@@ -97,16 +112,16 @@
                 }
             }
         },
-        calculateTileSize: function(image, colums, rows) {
+        calculateTileSize: function(image, columns, rows) {
             return {
-                width: Math.ceil(image.width / colums),
+                width: Math.ceil(image.width / columns),
                 height: Math.ceil(image.height / rows)
             };
         },
         init: function(viewport) {
             this.$viewport = $(viewport);
             this.baseImage = this.$viewport.find('img')[0];
-            this.cutImageUp(this.size.columns, this.size.rows, this.baseImage);
+            this.cutImageIntoTiles(this.size.columns, this.size.rows, this.baseImage);
             $(this.baseImage).hide();
             var that = this;
         }
@@ -119,7 +134,6 @@
             p.init(this);
         });
 
-        $(document).trigger("preRandomize");
         $(document).trigger("randomize");
     });
 }(jQuery));
