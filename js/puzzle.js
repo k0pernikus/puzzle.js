@@ -82,6 +82,9 @@
             this.canvas.height = this.size.height;
             this.$canvas = $(this.canvas);
 
+            this.$canvas.draggable();
+
+
             $viewport[0].appendChild(this.canvas);
 
             this.coordinates = this.$canvas.position();
