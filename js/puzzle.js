@@ -58,13 +58,13 @@
             this.$canvas.bind('click', function() {
             });
 
-            $(document).bind('randomize', function() {
+            $document.bind('randomize', function() {
                 that.preRandomize();
                 that.moveToCorrectPosition();
                 that.randomize();
             });
 
-            $(document).bind('solve', function() {
+            $document.bind('solve', function() {
                 that.moveToCorrectPosition();
             });
         },
@@ -129,13 +129,13 @@
         }
     }
 
-    $(document).ready(function() {
+    $document.ready(function() {
         var $puzzles = $(".puzzlejs_viewport");
         $puzzles.each(function() {
             var p = Object.create(puzzle);
             p.init(this);
         });
 
-        $(document).trigger("randomize");
+        $document.trigger("randomize");
     });
 }(jQuery));
