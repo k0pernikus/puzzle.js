@@ -1,7 +1,7 @@
 (function puzzle($) {
     var $document = $(document);
 
-    var tileProperty = {
+    var TileProperty = {
         correctCoordinates: {
             x: null,
             y: null
@@ -92,7 +92,7 @@
         }
     }
 
-    var puzzle = {
+    var PuzzleProperty = {
         baseImage: null,
         size: {
             columns: 10,
@@ -105,8 +105,8 @@
             var tileSize = this.calculateTileSize(image, numColsToCut, numRowsToCut);
             for (var y = 0; y < numRowsToCut; ++y) {
                 for (var x = 0; x < numColsToCut; ++x) {
-                    var tile = Object.create(tileProperty);
-                    tile.position = Object.create(tileProperty.position);
+                    var tile = Object.create(TileProperty);
+                    tile.position = Object.create(TileProperty.position);
                     tile.init(x, y, tileSize, this.$viewport);
                     tile.fillImage(image, x, y, tileSize);
                     this.tiles.push(tile);
@@ -132,7 +132,7 @@
     $document.ready(function() {
         var $puzzles = $(".puzzlejs_viewport");
         $puzzles.each(function() {
-            var p = Object.create(puzzle);
+            var p = Object.create(PuzzleProperty);
             p.init(this);
         });
 
