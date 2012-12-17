@@ -48,7 +48,7 @@
             this.moveToPosition(x, y);
         },
         moveToPosition: function(left, top) {
-            this.$canvas.animate({top: top.toString() + "px", left: left.toString() + "px"});
+            this.$canvas.animate({top: top, left: left});
         },
         moveToCorrectPosition: function() {
             this.moveToPosition(this.correctCoordinates.x, this.correctCoordinates.y);
