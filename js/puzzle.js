@@ -24,8 +24,18 @@
         addNeighbor: function(tile) {
             this.neighbors.push(tile);
         },
-        isNeighbour: function(tile) {
-            return ($.inArray(tile, this.neighbors));
+        isItANeighbor: function(canvas, targetTile) {
+            var that = this;
+            $(this.neighbors).each(function() {
+                if (canvas.isEqualNode(this.canvas)) {
+                    var droppedTile = this;
+
+                    var xDiff = droppedTile.position.x - targetTile.position.x;
+                    var yDiff = droppedTile.position.y - targetTile.position.y;
+
+                    droppedTile.moveToPosition(targetTile.coordinates.left + xDiff * that.size.width, targetTile.coordinates.top + yDiff * that.size.height);
+                }
+            });
         },
         fillImage: function(image, x, y, tileSize) {
             var ctx = this.canvas.getContext('2d');
@@ -39,7 +49,6 @@
             var y = this.position.y * this.size.height;
 
             this.correctCoordinates = {x: x, y: y};
-            console.log(this.correctCoordinates);
         },
         randomize: function() {
             var x = this.getRandomNumberInRange(this.size.width, 900) - this.size.width;
@@ -58,6 +67,13 @@
             this.$canvas.bind('click', function() {
             });
 
+            this.$canvas.on('click', function() {
+                $(that.neighbors).each(function() {
+                    this.$canvas.css('opacity', '0.5');
+                });
+
+            });
+
             $document.bind('randomize', function() {
                 that.preRandomize();
                 that.moveToCorrectPosition();
@@ -67,11 +83,36 @@
             $document.bind('solve', function() {
                 that.moveToCorrectPosition();
             });
+
+            $document.bind('getByPosition', function(event, x, y) {
+                if (that.position.x == x && that.position.y == y) {
+                }
+            });
+
+            $document.bind('addNeighbor', function(event, possibleNeighbor) {
+                if (that === possibleNeighbor) {
+                    return;
+                }
+
+                var xDiff = that.position.x - possibleNeighbor.position.x;
+                var yDiff = that.position.y - possibleNeighbor.position.y;
+
+                var isLeft = yDiff == 0 && xDiff == -1;
+                var isRight = yDiff == 0 && xDiff == 1;
+
+                var isTop = yDiff == -1 && xDiff == 0;
+                var isBottom = yDiff == 1 && xDiff == 0;
+
+                if (isLeft || isRight || isTop || isBottom) {
+                    that.addNeighbor(possibleNeighbor);
+                }
+            });
         },
         init: function(x, y, tileSizeInPixels, $viewport) {
             this.position = Object.create(this.position);
             this.coordinates = Object.create(this.coordinates);
             this.correctCoordinates = Object.create(this.coordinates);
+            this.neighbors = [];
 
             this.position.x = x;
             this.position.y = y;
@@ -81,12 +122,32 @@
             this.canvas.width = this.size.width;
             this.canvas.height = this.size.height;
             this.$canvas = $(this.canvas);
+            this.$canvas.attr("data-x", x);
+            this.$canvas.attr("data-y", y);
 
+            var that = this;
             this.$canvas.draggable();
 
+            var that = this;
+            //$.extend(this.$canvas, this);
+            this.$canvas.droppable({
+                tolerance: "touch",
+                activate: function(event, ui) {
+                    var originatingOffset = ui.offset;
+                },
+                drop: function(event, ui) {
+                    that.coordinates = that.$canvas.position();
+                    var targetTile = that;
+                    /**
+                     * TODO: I really need to get my hands on the tile instead of only the canvas
+                     */
+                    var droppedCanvas = ui.draggable[0];
+
+                    targetTile.isItANeighbor(droppedCanvas, targetTile);
+                }
+            });
 
             $viewport[0].appendChild(this.canvas);
-
             this.coordinates = this.$canvas.position();
             this.bind();
         }
@@ -95,8 +156,8 @@
     var PuzzleProperty = {
         baseImage: null,
         size: {
-            columns: 10,
-            rows: 10
+            columns: 5,
+            rows: 5
         },
         tiles: [],
         $viewport: null,
@@ -113,6 +174,13 @@
                     tile = null;
                 }
             }
+
+            $(this.tiles).each(function() {
+                $document.trigger('addNeighbor', this);
+            });
+
+            $(this.tiles).each(function() {
+            });
         },
         calculateTileSize: function(image, columns, rows) {
             return {
