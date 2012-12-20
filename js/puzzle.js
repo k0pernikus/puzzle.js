@@ -2,6 +2,7 @@
     var $document = $(document);
 
     var TileProperty = {
+        groups: [],
         correctCoordinates: {
             x: null,
             y: null
@@ -34,8 +35,36 @@
                     var yDiff = droppedTile.position.y - targetTile.position.y;
 
                     droppedTile.moveToPosition(targetTile.coordinates.left + xDiff * that.size.width, targetTile.coordinates.top + yDiff * that.size.height);
+
+                    that.addToSameGroup(droppedTile, targetTile);
                 }
             });
+        },
+        addToSameGroup: function(droppedTile, targetTile) {
+            var that = this;
+            group1 = droppedTile.groups;
+            group2 = targetTile.groups;
+
+            if (group1.length == 0 && group2.length == 0) {
+                var id = 0;
+                while(true) {
+                    if ($.inArray(id, that.allGroups.groups) !== -1) {
+                        id++;
+                    } else {
+                        that.allGroups.groups.push(id);
+                        break;
+                    }
+                }
+            }
+
+            group1.push(id);
+            group2.push(id);
+
+            droppedTile.$canvas.trigger('updateClasses');
+            targetTile.$canvas.trigger('updateClasses');
+        },
+        allGroups: {
+            groups: []
         },
         fillImage: function(image, x, y, tileSize) {
             var ctx = this.canvas.getContext('2d');
@@ -65,6 +94,14 @@
         bind: function() {
             var that = this;
             this.$canvas.bind('click', function() {
+            });
+
+            this.$canvas.on('updateClasses', function() {
+                console.log('fnord');
+                $(that.groups).each(function(){
+                    console.log("group" + this.toString());
+                    that.$canvas.addClass("group" + this.toString());
+                })
             });
 
             this.$canvas.on('click', function() {

@@ -319,6 +319,18 @@ html,body{
   position: absolute !important;
 }
 
-.puzzlejs_viewport .ui-draggable.group  {
-  border:1px solid red;
+.puzzlejs_viewport .ui-draggable  {
+  border:1px solid #000000;
+}
+
+.group0 {
+  border-color:red !important;
+}
+
+.group1 {
+  border:green !important;
+}
+
+.group2 {
+  border: #ff00ff !important;
 }
