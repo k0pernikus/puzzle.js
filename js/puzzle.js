@@ -1,7 +1,39 @@
 (function puzzle($) {
     var $document = $(document);
 
+    var GroupManager = {
+        addToSameGroup: function(droppedTile, targetTile) {
+            var that = this;
+            group1 = droppedTile.groups;
+            group2 = targetTile.groups;
+
+            var id = 0;
+            if (group1.length == 0 && group2.length == 0) {
+                while(id++) {
+                    if ($.inArray(id, that.allGroups.groups) !== -1) {
+                        console.log(id, that.allGroups.groups);
+                    } else {
+                        console.log("creaete new group", id);
+                        that.allGroups.groups.push(id);
+                        break;
+                    }
+                }
+            }
+
+            droppedTile.$canvas.trigger('updateClasses', {id: id});
+            targetTile.$canvas.trigger('updateClasses', {id: id});
+            this.dump();
+        },
+        allGroups: {
+            groups: []
+        },
+        dump: function() {
+            console.log(this.allGroups.groups);
+        }
+    };
+
     var TileProperty = {
+        groupManager: GroupManager,
         groups: [],
         correctCoordinates: {
             x: null,
@@ -36,36 +68,11 @@
 
                     droppedTile.moveToPosition(targetTile.coordinates.left + xDiff * that.size.width, targetTile.coordinates.top + yDiff * that.size.height);
 
-                    that.addToSameGroup(droppedTile, targetTile);
+                    GroupManager.addToSameGroup(droppedTile, targetTile);
                 }
             });
         },
-        addToSameGroup: function(droppedTile, targetTile) {
-            var that = this;
-            group1 = droppedTile.groups;
-            group2 = targetTile.groups;
 
-            if (group1.length == 0 && group2.length == 0) {
-                var id = 0;
-                while(true) {
-                    if ($.inArray(id, that.allGroups.groups) !== -1) {
-                        id++;
-                    } else {
-                        that.allGroups.groups.push(id);
-                        break;
-                    }
-                }
-            }
-
-            group1.push(id);
-            group2.push(id);
-
-            droppedTile.$canvas.trigger('updateClasses');
-            targetTile.$canvas.trigger('updateClasses');
-        },
-        allGroups: {
-            groups: []
-        },
         fillImage: function(image, x, y, tileSize) {
             var ctx = this.canvas.getContext('2d');
             ctx.drawImage(image, x * this.size.width, y * this.size.height, this.size.width, this.size.height, 0, 0, this.canvas.width, this.canvas.height);
@@ -96,11 +103,14 @@
             this.$canvas.bind('click', function() {
             });
 
-            this.$canvas.on('updateClasses', function() {
-                console.log('fnord');
+            this.$canvas.on('updateClasses', function(event, id) {
+                console.log(id);
+                that.groups.push(id.id);
+
+
                 $(that.groups).each(function(){
-                    console.log("group" + this.toString());
-                    that.$canvas.addClass("group" + this.toString());
+                    console.log("group" + id.id.toString());
+                    that.$canvas.addClass("group" + id.id.toString());
                 })
             });
 
@@ -145,6 +155,10 @@
                 }
             });
         },
+        getAllDraggables: function(ui) {
+            console.log(ui);
+            return $('.group' + ui.helper.attr('class').match(/group([0-9]+)/)[1]).not(ui);
+        },
         init: function(x, y, tileSizeInPixels, $viewport) {
             this.position = Object.create(this.position);
             this.coordinates = Object.create(this.coordinates);
@@ -163,7 +177,23 @@
             this.$canvas.attr("data-y", y);
 
             var that = this;
-            this.$canvas.draggable();
+            this.$canvas.draggable({
+                revert: true,
+                revertDuration: 10,
+                // grouped items animate separately, so leave this number low
+                //containment: '.demo',
+                stop: function(e, ui) {
+                    GroupManager.getAllDraggables(ui).css({
+                        'top': ui.helper.css('top'),
+                        'left': 0
+                    });
+                },
+                drag: function(e, ui) {
+                    $(that.neighbors).each(function(){
+                        this.moveToPosition(ui.helper.css('left'), ui.helper.css('top'));
+                    });
+                }
+            });
 
             var that = this;
             //$.extend(this.$canvas, this);
@@ -193,8 +223,8 @@
     var PuzzleProperty = {
         baseImage: null,
         size: {
-            columns: 5,
-            rows: 5
+            columns: 3,
+            rows: 3
         },
         tiles: [],
         $viewport: null,
