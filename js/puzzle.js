@@ -182,6 +182,10 @@
                 revertDuration: 10,
                 // grouped items animate separately, so leave this number low
                 //containment: '.demo',
+
+                start: function(e, ui) {
+                    ui.tileStartCoordinatess = that.$canvas.position();
+                },
                 stop: function(e, ui) {
 //                    GroupManager.getAllDraggables(ui).css({
 //                        'top': ui.helper.css('top'),
@@ -190,7 +194,16 @@
                 },
                 drag: function(e, ui) {
                     $(that.neighbors).each(function(){
-                        //this.moveToPosition(ui.helper.css('left'), ui.helper.css('top'));
+                        var xDiff = ui.originalPosition.left - ui.position.left
+                        var yDiff = ui.originalPosition.top - ui.position.top;
+
+                        $(".group1").each(function(){
+                            $this = $(this);
+                            $that = $this;
+
+                            $this.css("left", (parseFloat($that.css("left")) - xDiff) + 'px');
+                            $this.css("top", (parseFloat($that.css("top")) - yDiff) + 'px');
+                        });
                     });
                 }
             });
@@ -247,6 +260,7 @@
             });
 
             $(this.tiles).each(function() {
+                this.$canvas.trigger('updateClasses', {id: 1});
             });
         },
         calculateTileSize: function(image, columns, rows) {

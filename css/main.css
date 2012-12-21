@@ -328,7 +328,7 @@ html,body{
 }
 
 .group1 {
-  border:green !important;
+  border: 2px solid green !important;
 }
 
 .group2 {
