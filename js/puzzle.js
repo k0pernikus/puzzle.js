@@ -183,14 +183,14 @@
                 // grouped items animate separately, so leave this number low
                 //containment: '.demo',
                 stop: function(e, ui) {
-                    GroupManager.getAllDraggables(ui).css({
-                        'top': ui.helper.css('top'),
-                        'left': 0
-                    });
+//                    GroupManager.getAllDraggables(ui).css({
+//                        'top': ui.helper.css('top'),
+//                        'left': 0
+//                    });
                 },
                 drag: function(e, ui) {
                     $(that.neighbors).each(function(){
-                        this.moveToPosition(ui.helper.css('left'), ui.helper.css('top'));
+                        //this.moveToPosition(ui.helper.css('left'), ui.helper.css('top'));
                     });
                 }
             });
@@ -223,8 +223,8 @@
     var PuzzleProperty = {
         baseImage: null,
         size: {
-            columns: 3,
-            rows: 3
+            columns: 7,
+            rows: 7
         },
         tiles: [],
         $viewport: null,
