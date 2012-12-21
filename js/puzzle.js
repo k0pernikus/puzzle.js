@@ -178,7 +178,7 @@
 
             var that = this;
             this.$canvas.draggable({
-                revert: true,
+                revert: false,
                 revertDuration: 10,
                 // grouped items animate separately, so leave this number low
                 //containment: '.demo',
