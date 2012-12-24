@@ -304,33 +304,21 @@ canvas {
 }
 
 html,body{
-  width:100%;
-  height:100%
 }
 
 .puzzlejs_viewport {
   position: relative;
-  width:100%;
-  height:100%;
-  border:10px solid black;
+  /*border:10px solid black;*/
 }
 
 .puzzlejs_viewport .ui-draggable {
   position: absolute !important;
 }
 
-.puzzlejs_viewport .ui-draggable  {
-  border:1px solid #000000;
+.puzzlejs_viewport .ui-draggable.markNeighbors   {
+  border: 2px solid red;
+  z-index: 999;
 }
 
-.group0 {
-  border-color:red !important;
-}
-
-.group1 {
-  border: 2px solid green !important;
-}
-
-.group2 {
-  border: #ff00ff !important;
+.img {
 }

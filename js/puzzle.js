@@ -3,9 +3,14 @@
 
     var GroupManager = {
         addToSameGroup: function(droppedTile, targetTile) {
+            return;
+            /** TODO
+             * implementMe
+             * @type {*}
+             */
             var that = this;
-            group1 = droppedTile.groups;
-            group2 = targetTile.groups;
+            var group1 = droppedTile.groups;
+            var group2 = targetTile.groups;
 
             var id = 0;
             if (group1.length == 0 && group2.length == 0) {
@@ -75,6 +80,7 @@
 
         fillImage: function(image, x, y, tileSize) {
             var ctx = this.canvas.getContext('2d');
+
             ctx.drawImage(image, x * this.size.width, y * this.size.height, this.size.width, this.size.height, 0, 0, this.canvas.width, this.canvas.height);
         },
         getRandomNumberInRange: function(LowerRange, UpperRange) {
@@ -101,22 +107,21 @@
         bind: function() {
             var that = this;
             this.$canvas.bind('click', function() {
+
             });
 
             this.$canvas.on('updateClasses', function(event, id) {
-                console.log(id);
                 that.groups.push(id.id);
 
 
                 $(that.groups).each(function(){
-                    console.log("group" + id.id.toString());
                     that.$canvas.addClass("group" + id.id.toString());
                 })
             });
 
             this.$canvas.on('click', function() {
                 $(that.neighbors).each(function() {
-                    this.$canvas.css('opacity', '0.5');
+                    this.$canvas.toggleClass('markNeighbors');
                 });
 
             });
@@ -193,18 +198,19 @@
 //                    });
                 },
                 drag: function(e, ui) {
-                    $(that.neighbors).each(function(){
-                        var xDiff = ui.originalPosition.left - ui.position.left
-                        var yDiff = ui.originalPosition.top - ui.position.top;
+//                    var xDiff = ui.originalPosition.left - ui.position.left
+//                    var yDiff = ui.originalPosition.top - ui.position.top;
+//
+//                    $(".group1").each(function(){
+//                        $this = $(this);
+//                        $that = $this;
+//
+//                        $this.css("left", (parseFloat($that.css("left")) - xDiff) + 'px');
+//                        $this.css("top", (parseFloat($that.css("top")) - yDiff) + 'px');
+//                    });
+//                    $(that.neighbors).each(function() {
 
-                        $(".group1").each(function(){
-                            $this = $(this);
-                            $that = $this;
-
-                            $this.css("left", (parseFloat($that.css("left")) - xDiff) + 'px');
-                            $this.css("top", (parseFloat($that.css("top")) - yDiff) + 'px');
-                        });
-                    });
+//                    });
                 }
             });
 
@@ -236,16 +242,18 @@
     var PuzzleProperty = {
         baseImage: null,
         size: {
-            columns: 7,
-            rows: 7
+            columns: 15,
+            rows: 15
         },
         tiles: [],
         $viewport: null,
         image: new Image(),
         cutImageIntoTiles: function(numColsToCut, numRowsToCut, image) {
             var tileSize = this.calculateTileSize(image, numColsToCut, numRowsToCut);
+            console.log(tileSize);
             for (var y = 0; y < numRowsToCut; ++y) {
                 for (var x = 0; x < numColsToCut; ++x) {
+                    console.log(x, y);
                     var tile = Object.create(TileProperty);
                     tile.position = Object.create(TileProperty.position);
                     tile.init(x, y, tileSize, this.$viewport);
@@ -264,6 +272,7 @@
             });
         },
         calculateTileSize: function(image, columns, rows) {
+            console.log(image.width, image.height, columns, rows);
             return {
                 width: Math.ceil(image.width / columns),
                 height: Math.ceil(image.height / rows)
@@ -281,10 +290,11 @@
     $document.ready(function() {
         var $puzzles = $(".puzzlejs_viewport");
         $puzzles.each(function() {
-            var p = Object.create(PuzzleProperty);
-            p.init(this);
+            Object.create(PuzzleProperty).init(this);
         });
 
         $document.trigger("randomize");
+//        $document.trigger("solve");
+
     });
 }(jQuery));
