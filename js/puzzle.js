@@ -1,4 +1,4 @@
-(function puzzle($) {
+(function puzzle($, document) {
     var $document = $(document);
 
     var GroupManager = {
@@ -297,4 +297,4 @@
 //        $document.trigger("solve");
 
     });
-}(jQuery));
+}(jQuery, document));
