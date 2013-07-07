@@ -1,4 +1,5 @@
-(function puzzle($, document) {
+(function puzzle($, window, document) {
+    var $window = $(window);
     var $document = $(document);
 
     var GroupManager = {
@@ -287,14 +288,18 @@
         }
     }
 
-    $document.ready(function() {
+    $window.load(function() {
+        /**
+         * NOTE: window.load ensures that image is fully loaded
+         */
+
         var $puzzles = $(".puzzlejs_viewport");
         $puzzles.each(function() {
             Object.create(PuzzleProperty).init(this);
         });
 
         $document.trigger("randomize");
-//        $document.trigger("solve");
+        //$document.trigger("solve");
 
     });
-}(jQuery, document));
+}(jQuery, window, document));
