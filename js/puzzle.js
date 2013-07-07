@@ -243,8 +243,8 @@
     var PuzzleProperty = {
         baseImage: null,
         size: {
-            columns: 15,
-            rows: 15
+            columns: 4,
+            rows: 4
         },
         tiles: [],
         $viewport: null,
