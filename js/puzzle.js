@@ -45,8 +45,8 @@
                     droppedTile.registerNeighbor(targetTile);
 
 
-
                     var connectedTiles = [];
+
                     function traverse(o) {
                         if (o.hasOwnProperty("connectedNeighbors")) {
                             o["connectedNeighbors"].forEach(function (tile) {
@@ -57,6 +57,7 @@
                             });
                         }
                     }
+
                     traverse(droppedTile);
                     connectedTiles.forEach(function (tile) {
                         tile.moveToCorrectPositionRelativeTo(droppedTile);
@@ -80,10 +81,10 @@
         },
         randomize: function () {
 
-                var x = this.getRandomNumberInRange(this.size.width, window.screen.availWidth) - this.size.width;
-                var y = this.getRandomNumberInRange(this.size.height, window.screen.availHeight) - this.size.height;
+            var x = this.getRandomNumberInRange(this.size.width, window.screen.availWidth) - this.size.width;
+            var y = this.getRandomNumberInRange(this.size.height, window.screen.availHeight) - this.size.height;
             var that = this;
-            setTimeout(function() {
+            setTimeout(function () {
                 that.animateToPosition(x, y);
             }, 2000);
 
@@ -299,40 +300,40 @@
         }
     }
 
-        function handleFileSelect(evt) {
-            var files = evt.target.files; // FileList object
+    function handleFileSelect(evt) {
+        var files = evt.target.files; // FileList object
 
-            // Loop through the FileList and render image files as thumbnails.
-            for (var i = 0, f; f = files[i]; i++) {
+        // Loop through the FileList and render image files as thumbnails.
+        for (var i = 0, f; f = files[i]; i++) {
 
-                // Only process image files.
-                if (!f.type.match('image.*')) {
-                    continue;
-                }
-
-                var reader = new FileReader();
-
-                // Closure to capture the file information.
-                reader.onload = (function(theFile) {
-                    return function(e) {
-                        // Render thumbnail.
-                        var div = document.createElement('div');
-                        div.className = "puzzlejs_viewport";
-                        $(".puzzlejs_viewport").attr("data-x-tiles", 50);
-                        $(".puzzlejs_viewport").attr("data-y-tiles", 40);
-                        $(".puzzlejs_viewport").css("position", "relative");
-                        div.innerHTML = ['<img class="thumb" src="', e.target.result,
-                            '" title="', escape(theFile.name), '"/>'].join('');
-                        document.getElementById('list').insertBefore(div, null);
-                        Object.create(PuzzleProperty).init($(div));
-                        $document.trigger('randomize');
-                    };
-                })(f);
-
-                // Read in the image file as a data URL.
-                reader.readAsDataURL(f);
+            // Only process image files.
+            if (!f.type.match('image.*')) {
+                continue;
             }
-        }
 
-        document.getElementById('files').addEventListener('change', handleFileSelect, false);
+            var reader = new FileReader();
+
+            // Closure to capture the file information.
+            reader.onload = (function (theFile) {
+                return function (e) {
+                    // Render thumbnail.
+                    var div = document.createElement('div');
+                    div.className = "puzzlejs_viewport";
+                    $(".puzzlejs_viewport").attr("data-x-tiles", 50);
+                    $(".puzzlejs_viewport").attr("data-y-tiles", 40);
+                    $(".puzzlejs_viewport").css("position", "relative");
+                    div.innerHTML = ['<img class="thumb" src="', e.target.result,
+                        '" title="', escape(theFile.name), '"/>'].join('');
+                    document.getElementById('list').insertBefore(div, null);
+                    Object.create(PuzzleProperty).init($(div));
+                    $document.trigger('randomize');
+                };
+            })(f);
+
+            // Read in the image file as a data URL.
+            reader.readAsDataURL(f);
+        }
+    }
+
+    document.getElementById('files').addEventListener('change', handleFileSelect, false);
 }(jQuery, window, document));
