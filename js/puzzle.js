@@ -45,8 +45,8 @@
                     droppedTile.registerNeighbor(targetTile);
 
 
-
                     var connectedTiles = [];
+
                     function traverse(o) {
                         if (o.hasOwnProperty("connectedNeighbors")) {
                             o["connectedNeighbors"].forEach(function (tile) {
@@ -57,6 +57,7 @@
                             });
                         }
                     }
+
                     traverse(droppedTile);
                     connectedTiles.forEach(function (tile) {
                         tile.moveToCorrectPositionRelativeTo(droppedTile);
@@ -69,6 +70,7 @@
             ctx.drawImage(image, x * tileSize.width, y * tileSize.height, tileSize.width, tileSize.height, 0, 0, tileSize.width, tileSize.height);
         },
         getRandomNumberInRange: function (LowerRange, UpperRange) {
+            console.log(LowerRange, UpperRange);
             return Math.floor(Math.random() * (UpperRange - LowerRange + 1)) + LowerRange;
         },
         preRandomize: function () {
@@ -78,10 +80,15 @@
             this.correctCoordinatesInPixel = {x: x, y: y};
         },
         randomize: function () {
-            var x = this.getRandomNumberInRange(this.size.width, 900) - this.size.width;
-            var y = this.getRandomNumberInRange(this.size.height, 500) - this.size.height;
 
-            this.animateToPosition(x, y);
+            var x = this.getRandomNumberInRange(this.size.width, window.screen.availWidth) - this.size.width;
+            var y = this.getRandomNumberInRange(this.size.height, window.screen.availHeight) - this.size.height;
+            var that = this;
+            setTimeout(function () {
+                that.animateToPosition(x, y);
+            }, 2000);
+
+
         },
         animateToPosition: function (left, top) {
             this.$canvas.animate({
@@ -236,7 +243,6 @@
                      * TODO: I really need to get my hands on the tile instead of only the canvas
                      */
                     var droppedCanvas = ui.draggable[0];
-
                     targetTile.handlePotentialNeighbour(droppedCanvas, targetTile);
                 }
             });
@@ -251,8 +257,8 @@
     var PuzzleProperty = {
         baseImage: null,
         size: {
-            columns: 4,
-            rows: 4
+            columns: 6,
+            rows: 6
         },
         tiles: [],
         $viewport: null,
@@ -294,16 +300,40 @@
         }
     }
 
-    $window.load(function () {
-        /**
-         * NOTE: window.load ensures that image is fully loaded
-         */
+    function handleFileSelect(evt) {
+        var files = evt.target.files; // FileList object
 
-        var $puzzles = $(".puzzlejs_viewport");
-        $puzzles.each(function () {
-            Object.create(PuzzleProperty).init(this);
-        });
+        // Loop through the FileList and render image files as thumbnails.
+        for (var i = 0, f; f = files[i]; i++) {
 
-        $document.trigger("randomize");
-    });
+            // Only process image files.
+            if (!f.type.match('image.*')) {
+                continue;
+            }
+
+            var reader = new FileReader();
+
+            // Closure to capture the file information.
+            reader.onload = (function (theFile) {
+                return function (e) {
+                    // Render thumbnail.
+                    var div = document.createElement('div');
+                    div.className = "puzzlejs_viewport";
+                    $(".puzzlejs_viewport").attr("data-x-tiles", 50);
+                    $(".puzzlejs_viewport").attr("data-y-tiles", 40);
+                    $(".puzzlejs_viewport").css("position", "relative");
+                    div.innerHTML = ['<img class="thumb" src="', e.target.result,
+                        '" title="', escape(theFile.name), '"/>'].join('');
+                    document.getElementById('list').insertBefore(div, null);
+                    Object.create(PuzzleProperty).init($(div));
+                    $document.trigger('randomize');
+                };
+            })(f);
+
+            // Read in the image file as a data URL.
+            reader.readAsDataURL(f);
+        }
+    }
+
+    document.getElementById('files').addEventListener('change', handleFileSelect, false);
 }(jQuery, window, document));
