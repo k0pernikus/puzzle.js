@@ -69,6 +69,7 @@
             ctx.drawImage(image, x * tileSize.width, y * tileSize.height, tileSize.width, tileSize.height, 0, 0, tileSize.width, tileSize.height);
         },
         getRandomNumberInRange: function (LowerRange, UpperRange) {
+            console.log(LowerRange, UpperRange);
             return Math.floor(Math.random() * (UpperRange - LowerRange + 1)) + LowerRange;
         },
         preRandomize: function () {
@@ -78,8 +79,10 @@
             this.correctCoordinatesInPixel = {x: x, y: y};
         },
         randomize: function () {
-            var x = this.getRandomNumberInRange(this.size.width, 900) - this.size.width;
-            var y = this.getRandomNumberInRange(this.size.height, 500) - this.size.height;
+            var x = this.getRandomNumberInRange(this.size.width, window.screen.availWidth) - this.size.width;
+            var y = this.getRandomNumberInRange(this.size.height, window.screen.availHeight) - this.size.height;
+
+            console.log(window.screen);
 
             this.animateToPosition(x, y);
         },
@@ -250,8 +253,8 @@
     var PuzzleProperty = {
         baseImage: null,
         size: {
-            columns: 4,
-            rows: 4
+            columns: 6,
+            rows: 6
         },
         tiles: [],
         $viewport: null,
