@@ -236,7 +236,6 @@
                      * TODO: I really need to get my hands on the tile instead of only the canvas
                      */
                     var droppedCanvas = ui.draggable[0];
-
                     targetTile.handlePotentialNeighbour(droppedCanvas, targetTile);
                 }
             });
@@ -294,16 +293,41 @@
         }
     }
 
-    $window.load(function () {
-        /**
-         * NOTE: window.load ensures that image is fully loaded
-         */
+        function handleFileSelect(evt) {
+            var files = evt.target.files; // FileList object
 
-        var $puzzles = $(".puzzlejs_viewport");
-        $puzzles.each(function () {
-            Object.create(PuzzleProperty).init(this);
-        });
+            // Loop through the FileList and render image files as thumbnails.
+            for (var i = 0, f; f = files[i]; i++) {
 
-        $document.trigger("randomize");
-    });
+                // Only process image files.
+                if (!f.type.match('image.*')) {
+                    continue;
+                }
+
+                var reader = new FileReader();
+
+                // Closure to capture the file information.
+                reader.onload = (function(theFile) {
+                    return function(e) {
+                        // Render thumbnail.
+                        var div = document.createElement('div');
+                        div.className = "puzzlejs_viewport";
+                        $(".puzzlejs_viewport").attr("data-x-tiles", 50);
+                        $(".puzzlejs_viewport").attr("data-y-tiles", 40);
+                        $(".puzzlejs_viewport").css("position", "relative");
+                        div.innerHTML = ['<img class="thumb" src="', e.target.result,
+                            '" title="', escape(theFile.name), '"/>'].join('');
+                        document.getElementById('list').insertBefore(div, null);
+                        Object.create(PuzzleProperty).init($(div));
+                        $document.trigger('randomize');
+
+                    };
+                })(f);
+
+                // Read in the image file as a data URL.
+                reader.readAsDataURL(f);
+            }
+        }
+
+        document.getElementById('files').addEventListener('change', handleFileSelect, false);
 }(jQuery, window, document));
