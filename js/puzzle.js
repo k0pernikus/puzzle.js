@@ -42,8 +42,8 @@
                     var yDiff = droppedTile.positionWithinGrid.y - targetTile.positionWithinGrid.y;
 
                     droppedTile.animateToPosition(targetTile.coordinatesInPixel.left + xDiff * that.size.width, targetTile.coordinatesInPixel.top + yDiff * that.size.height);
-
                     droppedTile.registerNeighbor(targetTile);
+
                 }
             });
         },
@@ -77,14 +77,10 @@
         },
         moveToCorrectPositionRelativeTo: function(tile) {
             var position = tile.$canvas.position();
-            console.log(position);
-
             var dX = (this.positionWithinGrid.x - tile.positionWithinGrid.x)
             var dY = (this.positionWithinGrid.y - tile.positionWithinGrid.y);
-
             var left = dX * this.size.width + position.left;
             var top = dY * this.size.height + position.top;
-
 
             this.animateToPosition(left, top);
         },
@@ -237,9 +233,6 @@
         }
     }
 
-
-
-
     var PuzzleProperty = {
         baseImage: null,
         size: {
@@ -279,7 +272,6 @@
         bind: function() {
             $document.on('notifyConnectedTilesAmount', function(event, data) {
                 console.log(data);
-
             });
         },
         init: function(viewport) {
