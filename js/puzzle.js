@@ -79,12 +79,15 @@
             this.correctCoordinatesInPixel = {x: x, y: y};
         },
         randomize: function () {
-            var x = this.getRandomNumberInRange(this.size.width, window.screen.availWidth) - this.size.width;
-            var y = this.getRandomNumberInRange(this.size.height, window.screen.availHeight) - this.size.height;
 
-            console.log(window.screen);
+                var x = this.getRandomNumberInRange(this.size.width, window.screen.availWidth) - this.size.width;
+                var y = this.getRandomNumberInRange(this.size.height, window.screen.availHeight) - this.size.height;
+            var that = this;
+            setTimeout(function() {
+                that.animateToPosition(x, y);
+            }, 2000);
 
-            this.animateToPosition(x, y);
+
         },
         animateToPosition: function (left, top) {
             this.$canvas.animate({
@@ -323,7 +326,6 @@
                         document.getElementById('list').insertBefore(div, null);
                         Object.create(PuzzleProperty).init($(div));
                         $document.trigger('randomize');
-
                     };
                 })(f);
 
