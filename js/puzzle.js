@@ -323,7 +323,7 @@
                     $(".puzzlejs_viewport").attr("data-y-tiles", 40);
                     $(".puzzlejs_viewport").css("position", "relative");
                     div.innerHTML = ['<img class="thumb" src="', e.target.result,
-                        '" title="', escape(theFile.name), '"/>'].join('');
+                        '" title="', encodeURI(theFile.name), '"/>'].join('');
                     document.getElementById('list').insertBefore(div, null);
                     Object.create(PuzzleProperty).init($(div));
                     $document.trigger('randomize');
