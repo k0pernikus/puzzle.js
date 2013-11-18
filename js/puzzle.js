@@ -40,11 +40,10 @@
                     var xDiff = droppedTile.positionWithinGrid.x - targetTile.positionWithinGrid.x;
                     var yDiff = droppedTile.positionWithinGrid.y - targetTile.positionWithinGrid.y;
 
+                    var connectedTiles = [];
+
                     droppedTile.animateToPosition(targetTile.coordinatesInPixel.left + xDiff * that.size.width, targetTile.coordinatesInPixel.top + yDiff * that.size.height);
                     droppedTile.registerNeighbor(targetTile);
-
-
-                    var connectedTiles = [];
 
                     function traverse(tile) {
                         if (tile.hasOwnProperty("connectedNeighbors")) {
@@ -57,8 +56,10 @@
                             });
                         }
                     }
-
                     traverse(droppedTile);
+
+
+
 //                    connectedTiles.forEach(function (tile) {
 //                        tile.moveToCorrectPositionRelativeTo(droppedTile);
 //                    });
@@ -70,7 +71,6 @@
             ctx.drawImage(image, x * tileSize.width, y * tileSize.height, tileSize.width, tileSize.height, 0, 0, tileSize.width, tileSize.height);
         },
         getRandomNumberInRange: function (LowerRange, UpperRange) {
-            console.log(LowerRange, UpperRange);
             return Math.floor(Math.random() * (UpperRange - LowerRange + 1)) + LowerRange;
         },
         preRandomize: function () {
@@ -250,7 +250,7 @@
             });
 
             $viewport[0].appendChild(this.canvas);
-            this.coordinatesInPixel = this.$canvas.position();
+            this.coordinatesInPixel = this.$canvas.position;
             this.bind();
             this.coordinatesInPixel = null;
         }
@@ -303,7 +303,6 @@
     }
 
     $document.on('initPuzzle', function(e, $elem){
-        console.log($elem);
         Object.create(PuzzleProperty).init($elem);
         $document.trigger('randomize');
     });
