@@ -1,5 +1,4 @@
-(function puzzle($, window, document) {
-    var $window = $(window);
+(function puzzle($, window, document, u) {
     var $document = $(document);
 
     var TileProperty = {
@@ -47,11 +46,12 @@
 
                     var connectedTiles = [];
 
-                    function traverse(o) {
-                        if (o.hasOwnProperty("connectedNeighbors")) {
-                            o["connectedNeighbors"].forEach(function (tile) {
+                    function traverse(tile) {
+                        if (tile.hasOwnProperty("connectedNeighbors")) {
+                            tile["connectedNeighbors"].forEach(function (tile) {
                                 if ($.inArray(tile, connectedTiles) == -1) {
                                     connectedTiles.push(tile);
+                                    tile.moveToCorrectPositionRelativeTo(droppedTile);
                                     traverse(tile);
                                 }
                             });
@@ -59,9 +59,9 @@
                     }
 
                     traverse(droppedTile);
-                    connectedTiles.forEach(function (tile) {
-                        tile.moveToCorrectPositionRelativeTo(droppedTile);
-                    });
+//                    connectedTiles.forEach(function (tile) {
+//                        tile.moveToCorrectPositionRelativeTo(droppedTile);
+//                    });
                 }
             });
         },
@@ -128,6 +128,8 @@
             $document.bind('solve', function () {
                 that.moveToCorrectPosition();
             });
+
+
 
             $document.bind('getByPosition', function (event, x, y) {
                 if (that.positionWithinGrid.x == x && that.positionWithinGrid.y == y) {
@@ -300,40 +302,9 @@
         }
     }
 
-    function handleFileSelect(evt) {
-        var files = evt.target.files; // FileList object
-
-        // Loop through the FileList and render image files as thumbnails.
-        for (var i = 0, f; f = files[i]; i++) {
-
-            // Only process image files.
-            if (!f.type.match('image.*')) {
-                continue;
-            }
-
-            var reader = new FileReader();
-
-            // Closure to capture the file information.
-            reader.onload = (function (theFile) {
-                return function (e) {
-                    // Render thumbnail.
-                    var div = document.createElement('div');
-                    div.className = "puzzlejs_viewport";
-                    $(".puzzlejs_viewport").attr("data-x-tiles", 50);
-                    $(".puzzlejs_viewport").attr("data-y-tiles", 40);
-                    $(".puzzlejs_viewport").css("position", "relative");
-                    div.innerHTML = ['<img class="thumb" src="', e.target.result,
-                        '" title="', encodeURI(theFile.name), '"/>'].join('');
-                    document.getElementById('list').insertBefore(div, null);
-                    Object.create(PuzzleProperty).init($(div));
-                    $document.trigger('randomize');
-                };
-            })(f);
-
-            // Read in the image file as a data URL.
-            reader.readAsDataURL(f);
-        }
-    }
-
-    document.getElementById('files').addEventListener('change', handleFileSelect, false);
+    $document.on('initPuzzle', function(e, $elem){
+        console.log($elem);
+        Object.create(PuzzleProperty).init($elem);
+        $document.trigger('randomize');
+    });
 }(jQuery, window, document));

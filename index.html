@@ -26,5 +26,35 @@
         <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
         <script src="js/plugins.js"></script>
         <script src="js/puzzle.js"></script>
+        <script type="text/javascript">
+            function handleFileSelect(evt) {
+                evt.target.files
+                var files = evt.target.files; // FileList object
+
+                for (var i = 0, f; f = files[i]; i++) {
+                    if (!f.type.match('image.*')) {
+                        continue;
+                    }
+
+                    var reader = new FileReader();
+                    reader.onload = (function (theFile) {
+                        return function (e) {
+                            // Render thumbnail.
+                            var div = document.createElement('div');
+                            div.className = "puzzlejs_viewport";
+                            div.innerHTML = ['<img src="', e.target.result,
+                                '" title="', encodeURI(theFile.name), '"/>'].join('');
+                            $('#list')[0].insertBefore(div, null);
+
+                            $(document).trigger('initPuzzle', $(div));
+                        };
+                    })(f);
+
+                    reader.readAsDataURL(f);
+                }
+            }
+
+            $('#files').on('change', handleFileSelect);
+        </script>
     </body>
 </html>
