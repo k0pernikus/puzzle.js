@@ -45,9 +45,7 @@
                                 '" title="', encodeURI(theFile.name), '"/>'].join('');
                             $('#list')[0].insertBefore(div, null);
 
-                            //$(document).trigger('initPuzzle', $(div));
                             window.puzzlejs.init($(div));
-                            console.log('fuck yeah');
                         };
                     })(f);
 

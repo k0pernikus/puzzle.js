@@ -30,20 +30,19 @@
             this.connectedNeighbors.push(tile);
             tile.connectedNeighbors.push(this);
         },
-        handlePotentialNeighbour: function (canvas, neighborTargetTile) {
-            console.log('huh');
+        handlePotentialNeighbour: function (canvas) {
             var that = this;
             this.neighbors.forEach(function (tile) {
                 if (canvas.isEqualNode(tile.canvas)) {
                     var droppedTile = tile;
 
-                    var xDiff = droppedTile.positionWithinGrid.x - neighborTargetTile.positionWithinGrid.x;
-                    var yDiff = droppedTile.positionWithinGrid.y - neighborTargetTile.positionWithinGrid.y;
+                    var xDiff = droppedTile.positionWithinGrid.x - that.positionWithinGrid.x;
+                    var yDiff = droppedTile.positionWithinGrid.y - that.positionWithinGrid.y;
 
                     var connectedTiles = [];
 
-                    droppedTile.animateToPosition(neighborTargetTile.$canvas.position().left + xDiff * that.size.width, neighborTargetTile.$canvas.position().top + yDiff * that.size.height);
-                    droppedTile.registerNeighbor(neighborTargetTile);
+                    droppedTile.animateToPosition(that.$canvas.position().left + xDiff * that.size.width, that.$canvas.position().top + yDiff * that.size.height);
+                    droppedTile.registerNeighbor(that);
 
                     function traverse(tile) {
                         if (tile.hasOwnProperty("connectedNeighbors")) {
@@ -86,7 +85,7 @@
                     var location = that.getDirectionInGrid(neighbor);
 
                     if (isLeft && location.isLeft || isRight && location.isRight || isTop && location.isTop || isBottom && location.isBottom) {
-                        neighbor.handlePotentialNeighbour(that.canvas, neighbor);
+                        neighbor.handlePotentialNeighbour(that.canvas);
 
                     }
                 }
@@ -275,7 +274,7 @@
                      * TODO: I really need to get my hands on the tile instead of only the canvas
                      */
                     var droppedCanvas = ui.draggable[0];
-                    targetTile.handlePotentialNeighbour(droppedCanvas, targetTile);
+                    targetTile.handlePotentialNeighbour(droppedCanvas);
                 }
             });
 
