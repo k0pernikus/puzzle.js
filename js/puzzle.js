@@ -1,5 +1,4 @@
-(function puzzle($, window, document) {
-    var $window = $(window);
+(function puzzle($, window, document, u) {
     var $document = $(document);
 
     var TileProperty = {
@@ -24,7 +23,6 @@
         allConnectedTiles: null,
         canvas: null,
         $canvas: null,
-        traverseAllConnectedTiles: {},
         addNeighbor: function (tile) {
             this.neighbors.push(tile);
         },
@@ -32,36 +30,65 @@
             this.connectedNeighbors.push(tile);
             tile.connectedNeighbors.push(this);
         },
-        handlePotentialNeighbour: function (canvas, targetTile) {
+        handlePotentialNeighbour: function (canvas, neighborTargetTile) {
+            console.log('huh');
             var that = this;
             this.neighbors.forEach(function (tile) {
                 if (canvas.isEqualNode(tile.canvas)) {
                     var droppedTile = tile;
 
-                    var xDiff = droppedTile.positionWithinGrid.x - targetTile.positionWithinGrid.x;
-                    var yDiff = droppedTile.positionWithinGrid.y - targetTile.positionWithinGrid.y;
-
-                    droppedTile.animateToPosition(targetTile.coordinatesInPixel.left + xDiff * that.size.width, targetTile.coordinatesInPixel.top + yDiff * that.size.height);
-                    droppedTile.registerNeighbor(targetTile);
-
+                    var xDiff = droppedTile.positionWithinGrid.x - neighborTargetTile.positionWithinGrid.x;
+                    var yDiff = droppedTile.positionWithinGrid.y - neighborTargetTile.positionWithinGrid.y;
 
                     var connectedTiles = [];
 
-                    function traverse(o) {
-                        if (o.hasOwnProperty("connectedNeighbors")) {
-                            o["connectedNeighbors"].forEach(function (tile) {
+                    droppedTile.animateToPosition(neighborTargetTile.$canvas.position().left + xDiff * that.size.width, neighborTargetTile.$canvas.position().top + yDiff * that.size.height);
+                    droppedTile.registerNeighbor(neighborTargetTile);
+
+                    function traverse(tile) {
+                        if (tile.hasOwnProperty("connectedNeighbors")) {
+                            tile["connectedNeighbors"].forEach(function (tile) {
                                 if ($.inArray(tile, connectedTiles) == -1) {
                                     connectedTiles.push(tile);
+                                    tile.moveToCorrectPositionRelativeTo(droppedTile);
                                     traverse(tile);
                                 }
                             });
                         }
                     }
-
                     traverse(droppedTile);
-                    connectedTiles.forEach(function (tile) {
-                        tile.moveToCorrectPositionRelativeTo(droppedTile);
-                    });
+                }
+            });
+        },
+        closeToANeighbor: function(){
+            var that = this;
+            this.neighbors.forEach(function(neighbor) {
+                if ($.inArray(neighbor, that.allConnectedTiles) === -1) {
+                    var np = neighbor.$canvas.position();
+                    var tp = that.$canvas.position();
+
+                    var delta = {
+                        x: Math.abs(tp.left - np.left),
+                        x2: Math.abs(tp.left - np.left + that.size.width),
+                        x3: Math.abs(tp.left - np.left - that.size.width),
+                        y: Math.abs(tp.top - np.top),
+                        y2: Math.abs(tp.top - np.top + that.size.height),
+                        y3: Math.abs(tp.top - np.top - that.size.height)
+                    }
+
+                    var tolerance = 25;
+
+                    var isLeft = delta.x2 < tolerance && delta.y < tolerance;
+                    var isRight = delta.x3 < tolerance&& delta.y < tolerance;
+                    var isTop = delta.x < tolerance && delta.y2 < tolerance;
+                    var isBottom = delta.x < tolerance && delta.y3 < tolerance;
+
+                    var location = that.getDirectionInGrid(neighbor);
+
+                    if (isLeft && location.isLeft || isRight && location.isRight || isTop && location.isTop || isBottom && location.isBottom) {
+                        neighbor.handlePotentialNeighbour(that.canvas, neighbor);
+
+                    }
                 }
             });
         },
@@ -70,7 +97,6 @@
             ctx.drawImage(image, x * tileSize.width, y * tileSize.height, tileSize.width, tileSize.height, 0, 0, tileSize.width, tileSize.height);
         },
         getRandomNumberInRange: function (LowerRange, UpperRange) {
-            console.log(LowerRange, UpperRange);
             return Math.floor(Math.random() * (UpperRange - LowerRange + 1)) + LowerRange;
         },
         preRandomize: function () {
@@ -80,15 +106,12 @@
             this.correctCoordinatesInPixel = {x: x, y: y};
         },
         randomize: function () {
-
             var x = this.getRandomNumberInRange(this.size.width, window.screen.availWidth) - this.size.width;
             var y = this.getRandomNumberInRange(this.size.height, window.screen.availHeight) - this.size.height;
             var that = this;
             setTimeout(function () {
                 that.animateToPosition(x, y);
             }, 2000);
-
-
         },
         animateToPosition: function (left, top) {
             this.$canvas.animate({
@@ -129,6 +152,8 @@
                 that.moveToCorrectPosition();
             });
 
+
+
             $document.bind('getByPosition', function (event, x, y) {
                 if (that.positionWithinGrid.x == x && that.positionWithinGrid.y == y) {
                 }
@@ -139,18 +164,29 @@
                     return;
                 }
 
-                var xDiff = that.positionWithinGrid.x - possibleNeighbor.positionWithinGrid.x;
-                var yDiff = that.positionWithinGrid.y - possibleNeighbor.positionWithinGrid.y;
+                var location = that.getDirectionInGrid(possibleNeighbor);
 
-                var isLeft = yDiff == 0 && xDiff == -1;
-                var isRight = yDiff == 0 && xDiff == 1;
-                var isTop = yDiff == -1 && xDiff == 0;
-                var isBottom = yDiff == 1 && xDiff == 0;
-
-                if (isLeft || isRight || isTop || isBottom) {
+                if (location.isLeft || location.isRight || location.isTop || location.isBottom) {
                     that.addNeighbor(possibleNeighbor);
                 }
             });
+        },
+        getDirectionInGrid: function(neighbor) {
+            var xDiff = this.positionWithinGrid.x - neighbor.positionWithinGrid.x;
+            var yDiff = this.positionWithinGrid.y - neighbor.positionWithinGrid.y;
+
+            var isLeft = yDiff == 0 && xDiff == -1;
+            var isRight = yDiff == 0 && xDiff == 1;
+            var isTop = yDiff == -1 && xDiff == 0;
+            var isBottom = yDiff == 1 && xDiff == 0;
+
+            return {
+                isLeft: isLeft,
+                isRight: isRight,
+                isTop: isTop,
+                isBottom: isBottom
+
+            }
         },
         init: function (x, y, tileSizeInPixels, $viewport) {
             var Template = {
@@ -158,9 +194,7 @@
                 y: null
             }
 
-
             this.positionWithinGrid = Object.create(Template);
-            this.coordinatesInPixel = Object.create(Template);
             this.correctCoordinatesInPixel = Object.create(Template);
 
             this.neighbors = [];
@@ -189,10 +223,9 @@
                         previousPosition = ui.originalPosition;
                     }
 
-                    var currentPosition = $(this).position();
+                    var currentPosition = that.$canvas.position();
                     var leftOffset = currentPosition.left - previousPosition.left;
                     var topOffset = currentPosition.top - previousPosition.top;
-
 
                     that.allConnectedTiles = [];
                     function traverse(o) {
@@ -205,15 +238,14 @@
                             });
                         }
                     }
-
                     traverse(that);
-
 
                     that.allConnectedTiles.forEach(function (tile) {
                         var $canvas = tile.$canvas;
                         var position = $canvas.position();
                         var left = position.left;
                         var top = position.top;
+
                         $canvas.css('left', left + leftOffset);
                         $canvas.css('top', top + topOffset);
                     });
@@ -222,7 +254,6 @@
                 },
                 stop: function (e, ui) {
                     $(this).data('previousLocation', null);
-                    that.coordinatesInPixel = null;
                     that.allConnectedTiles.forEach(function (tile) {
                         if (that !== tile) {
                             tile.moveToCorrectPositionRelativeTo(that);
@@ -230,6 +261,7 @@
                     });
 
                     $document.trigger('notifyConnectedTilesAmount', that.allConnectedTiles.length);
+                    that.closeToANeighbor();
                 }
             });
 
@@ -237,7 +269,7 @@
             this.$canvas.droppable({
                 tolerance: "pointer",
                 drop: function (event, ui) {
-                    that.coordinatesInPixel = that.$canvas.position();
+                    var coordinatesInPixel = that.$canvas.position();
                     var targetTile = that;
                     /**
                      * TODO: I really need to get my hands on the tile instead of only the canvas
@@ -248,9 +280,8 @@
             });
 
             $viewport[0].appendChild(this.canvas);
-            this.coordinatesInPixel = this.$canvas.position();
+            this.coordinatesInPixel = this.$canvas.position;
             this.bind();
-            this.coordinatesInPixel = null;
         }
     }
 
@@ -300,40 +331,14 @@
         }
     }
 
-    function handleFileSelect(evt) {
-        var files = evt.target.files; // FileList object
+    $document.on('initPuzzle', function(e, $elem){
+        Object.create(PuzzleProperty).init($elem);
+        $document.trigger('randomize');
+    });
 
-        // Loop through the FileList and render image files as thumbnails.
-        for (var i = 0, f; f = files[i]; i++) {
-
-            // Only process image files.
-            if (!f.type.match('image.*')) {
-                continue;
-            }
-
-            var reader = new FileReader();
-
-            // Closure to capture the file information.
-            reader.onload = (function (theFile) {
-                return function (e) {
-                    // Render thumbnail.
-                    var div = document.createElement('div');
-                    div.className = "puzzlejs_viewport";
-                    $(".puzzlejs_viewport").attr("data-x-tiles", 50);
-                    $(".puzzlejs_viewport").attr("data-y-tiles", 40);
-                    $(".puzzlejs_viewport").css("position", "relative");
-                    div.innerHTML = ['<img class="thumb" src="', e.target.result,
-                        '" title="', escape(theFile.name), '"/>'].join('');
-                    document.getElementById('list').insertBefore(div, null);
-                    Object.create(PuzzleProperty).init($(div));
-                    $document.trigger('randomize');
-                };
-            })(f);
-
-            // Read in the image file as a data URL.
-            reader.readAsDataURL(f);
+    window.puzzlejs = {
+        init: function($elem) {
+            $document.trigger('initPuzzle', $elem);
         }
-    }
-
-    document.getElementById('files').addEventListener('change', handleFileSelect, false);
+    };
 }(jQuery, window, document));
