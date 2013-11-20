@@ -39,14 +39,15 @@
                     var reader = new FileReader();
                     reader.onload = (function (theFile) {
                         return function (e) {
-                            // Render thumbnail.
                             var div = document.createElement('div');
                             div.className = "puzzlejs_viewport";
                             div.innerHTML = ['<img src="', e.target.result,
                                 '" title="', encodeURI(theFile.name), '"/>'].join('');
                             $('#list')[0].insertBefore(div, null);
 
-                            $(document).trigger('initPuzzle', $(div));
+                            //$(document).trigger('initPuzzle', $(div));
+                            window.puzzlejs.init($(div));
+                            console.log('fuck yeah');
                         };
                     })(f);
 

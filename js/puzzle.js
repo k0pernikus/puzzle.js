@@ -23,7 +23,6 @@
         allConnectedTiles: null,
         canvas: null,
         $canvas: null,
-        traverseAllConnectedTiles: {},
         addNeighbor: function (tile) {
             this.neighbors.push(tile);
         },
@@ -57,12 +56,6 @@
                         }
                     }
                     traverse(droppedTile);
-
-
-
-//                    connectedTiles.forEach(function (tile) {
-//                        tile.moveToCorrectPositionRelativeTo(droppedTile);
-//                    });
                 }
             });
         },
@@ -306,4 +299,10 @@
         Object.create(PuzzleProperty).init($elem);
         $document.trigger('randomize');
     });
+
+    window.puzzlejs = {
+        init: function($elem) {
+            $document.trigger('initPuzzle', $elem);
+        }
+    };
 }(jQuery, window, document));
