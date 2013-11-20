@@ -30,19 +30,20 @@
             this.connectedNeighbors.push(tile);
             tile.connectedNeighbors.push(this);
         },
-        handlePotentialNeighbour: function (canvas, targetTile) {
+        handlePotentialNeighbour: function (canvas, neighborTargetTile) {
+            console.log('huh');
             var that = this;
             this.neighbors.forEach(function (tile) {
                 if (canvas.isEqualNode(tile.canvas)) {
                     var droppedTile = tile;
 
-                    var xDiff = droppedTile.positionWithinGrid.x - targetTile.positionWithinGrid.x;
-                    var yDiff = droppedTile.positionWithinGrid.y - targetTile.positionWithinGrid.y;
+                    var xDiff = droppedTile.positionWithinGrid.x - neighborTargetTile.positionWithinGrid.x;
+                    var yDiff = droppedTile.positionWithinGrid.y - neighborTargetTile.positionWithinGrid.y;
 
                     var connectedTiles = [];
 
-                    droppedTile.animateToPosition(targetTile.$canvas.position().left + xDiff * that.size.width, targetTile.$canvas.position().top + yDiff * that.size.height);
-                    droppedTile.registerNeighbor(targetTile);
+                    droppedTile.animateToPosition(neighborTargetTile.$canvas.position().left + xDiff * that.size.width, neighborTargetTile.$canvas.position().top + yDiff * that.size.height);
+                    droppedTile.registerNeighbor(neighborTargetTile);
 
                     function traverse(tile) {
                         if (tile.hasOwnProperty("connectedNeighbors")) {
@@ -62,29 +63,32 @@
         closeToANeighbor: function(){
             var that = this;
             this.neighbors.forEach(function(neighbor) {
-                var np = neighbor.$canvas.position();
-                var tp = that.$canvas.position();
+                if ($.inArray(neighbor, that.allConnectedTiles) === -1) {
+                    var np = neighbor.$canvas.position();
+                    var tp = that.$canvas.position();
 
-                var delta = {
-                    x: Math.abs(tp.left - np.left),
-                    x2: Math.abs(tp.left - np.left + that.size.width),
-                    x3: Math.abs(tp.left - np.left - that.size.width),
-                    y: Math.abs(tp.top - np.top),
-                    y2: Math.abs(tp.top - np.top + that.size.height),
-                    y3: Math.abs(tp.top - np.top - that.size.height)
-                }
+                    var delta = {
+                        x: Math.abs(tp.left - np.left),
+                        x2: Math.abs(tp.left - np.left + that.size.width),
+                        x3: Math.abs(tp.left - np.left - that.size.width),
+                        y: Math.abs(tp.top - np.top),
+                        y2: Math.abs(tp.top - np.top + that.size.height),
+                        y3: Math.abs(tp.top - np.top - that.size.height)
+                    }
 
-                var tolerance = 25;
+                    var tolerance = 25;
 
-                var isLeft = delta.x2 < tolerance && delta.y < tolerance;
-                var isRight = delta.x3 < tolerance&& delta.y < tolerance;
-                var isTop = delta.x < tolerance && delta.y2 < tolerance;
-                var isBottom = delta.x < tolerance && delta.y3 < tolerance;
+                    var isLeft = delta.x2 < tolerance && delta.y < tolerance;
+                    var isRight = delta.x3 < tolerance&& delta.y < tolerance;
+                    var isTop = delta.x < tolerance && delta.y2 < tolerance;
+                    var isBottom = delta.x < tolerance && delta.y3 < tolerance;
 
-                var location = that.getDirectionInGrid(neighbor);
+                    var location = that.getDirectionInGrid(neighbor);
 
-                if (isLeft && location.isLeft || isRight && location.isRight || isTop && location.isTop || isBottom && location.isBottom) {
-                    console.log('match them up!');
+                    if (isLeft && location.isLeft || isRight && location.isRight || isTop && location.isTop || isBottom && location.isBottom) {
+                        neighbor.handlePotentialNeighbour(that.canvas, neighbor);
+
+                    }
                 }
             });
         },
@@ -102,15 +106,12 @@
             this.correctCoordinatesInPixel = {x: x, y: y};
         },
         randomize: function () {
-
             var x = this.getRandomNumberInRange(this.size.width, window.screen.availWidth) - this.size.width;
             var y = this.getRandomNumberInRange(this.size.height, window.screen.availHeight) - this.size.height;
             var that = this;
             setTimeout(function () {
                 that.animateToPosition(x, y);
             }, 2000);
-
-
         },
         animateToPosition: function (left, top) {
             this.$canvas.animate({
@@ -193,7 +194,6 @@
                 y: null
             }
 
-
             this.positionWithinGrid = Object.create(Template);
             this.correctCoordinatesInPixel = Object.create(Template);
 
@@ -261,7 +261,6 @@
                     });
 
                     $document.trigger('notifyConnectedTilesAmount', that.allConnectedTiles.length);
-
                     that.closeToANeighbor();
                 }
             });
