@@ -6,10 +6,6 @@
             x: null,
             y: null
         },
-        coordinatesInPixel: {
-            x: null,
-            y: null
-        },
         positionWithinGrid: {
             x: null,
             y: null
@@ -55,13 +51,14 @@
                             });
                         }
                     }
+
                     traverse(droppedTile);
                 }
             });
         },
-        closeToANeighbor: function(){
+        closeToANeighbor: function () {
             var that = this;
-            this.neighbors.forEach(function(neighbor) {
+            this.neighbors.forEach(function (neighbor) {
                 if ($.inArray(neighbor, that.allConnectedTiles) === -1) {
                     var np = neighbor.$canvas.position();
                     var tp = that.$canvas.position();
@@ -78,7 +75,7 @@
                     var tolerance = 25;
 
                     var isLeft = delta.x2 < tolerance && delta.y < tolerance;
-                    var isRight = delta.x3 < tolerance&& delta.y < tolerance;
+                    var isRight = delta.x3 < tolerance && delta.y < tolerance;
                     var isTop = delta.x < tolerance && delta.y2 < tolerance;
                     var isBottom = delta.x < tolerance && delta.y3 < tolerance;
 
@@ -101,8 +98,6 @@
         preRandomize: function () {
             var x = this.positionWithinGrid.x * this.size.width;
             var y = this.positionWithinGrid.y * this.size.height;
-
-            this.correctCoordinatesInPixel = {x: x, y: y};
         },
         randomize: function () {
             var x = this.getRandomNumberInRange(this.size.width, window.screen.availWidth) - this.size.width;
@@ -152,7 +147,6 @@
             });
 
 
-
             $document.bind('getByPosition', function (event, x, y) {
                 if (that.positionWithinGrid.x == x && that.positionWithinGrid.y == y) {
                 }
@@ -170,7 +164,7 @@
                 }
             });
         },
-        getDirectionInGrid: function(neighbor) {
+        getDirectionInGrid: function (neighbor) {
             var xDiff = this.positionWithinGrid.x - neighbor.positionWithinGrid.x;
             var yDiff = this.positionWithinGrid.y - neighbor.positionWithinGrid.y;
 
@@ -237,6 +231,7 @@
                             });
                         }
                     }
+
                     traverse(that);
 
                     that.allConnectedTiles.forEach(function (tile) {
@@ -330,13 +325,13 @@
         }
     }
 
-    $document.on('initPuzzle', function(e, $elem){
+    $document.on('initPuzzle', function (e, $elem) {
         Object.create(PuzzleProperty).init($elem);
         $document.trigger('randomize');
     });
 
     window.puzzlejs = {
-        init: function($elem) {
+        init: function ($elem) {
             $document.trigger('initPuzzle', $elem);
         }
     };
