@@ -31,7 +31,6 @@
             tile.connectedNeighbors.push(this);
         },
         handlePotentialNeighbour: function (canvas, neighborTargetTile) {
-            console.log('huh');
             var that = this;
             this.neighbors.forEach(function (tile) {
                 if (canvas.isEqualNode(tile.canvas)) {
