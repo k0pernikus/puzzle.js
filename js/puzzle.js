@@ -41,7 +41,7 @@
 
                     var connectedTiles = [];
 
-                    droppedTile.animateToPosition(targetTile.coordinatesInPixel.left + xDiff * that.size.width, targetTile.coordinatesInPixel.top + yDiff * that.size.height);
+                    droppedTile.animateToPosition(targetTile.$canvas.position().left + xDiff * that.size.width, targetTile.$canvas.position().top + yDiff * that.size.height);
                     droppedTile.registerNeighbor(targetTile);
 
                     function traverse(tile) {
@@ -56,6 +56,35 @@
                         }
                     }
                     traverse(droppedTile);
+                }
+            });
+        },
+        closeToANeighbor: function(){
+            var that = this;
+            this.neighbors.forEach(function(neighbor) {
+                var np = neighbor.$canvas.position();
+                var tp = that.$canvas.position();
+
+                var delta = {
+                    x: Math.abs(tp.left - np.left),
+                    x2: Math.abs(tp.left - np.left + that.size.width),
+                    x3: Math.abs(tp.left - np.left - that.size.width),
+                    y: Math.abs(tp.top - np.top),
+                    y2: Math.abs(tp.top - np.top + that.size.height),
+                    y3: Math.abs(tp.top - np.top - that.size.height)
+                }
+
+                var tolerance = 25;
+
+                var isLeft = delta.x2 < tolerance && delta.y < tolerance;
+                var isRight = delta.x3 < tolerance&& delta.y < tolerance;
+                var isTop = delta.x < tolerance && delta.y2 < tolerance;
+                var isBottom = delta.x < tolerance && delta.y3 < tolerance;
+
+                var location = that.getDirectionInGrid(neighbor);
+
+                if (isLeft && location.isLeft || isRight && location.isRight || isTop && location.isTop || isBottom && location.isBottom) {
+                    console.log('match them up!');
                 }
             });
         },
@@ -134,18 +163,29 @@
                     return;
                 }
 
-                var xDiff = that.positionWithinGrid.x - possibleNeighbor.positionWithinGrid.x;
-                var yDiff = that.positionWithinGrid.y - possibleNeighbor.positionWithinGrid.y;
+                var location = that.getDirectionInGrid(possibleNeighbor);
 
-                var isLeft = yDiff == 0 && xDiff == -1;
-                var isRight = yDiff == 0 && xDiff == 1;
-                var isTop = yDiff == -1 && xDiff == 0;
-                var isBottom = yDiff == 1 && xDiff == 0;
-
-                if (isLeft || isRight || isTop || isBottom) {
+                if (location.isLeft || location.isRight || location.isTop || location.isBottom) {
                     that.addNeighbor(possibleNeighbor);
                 }
             });
+        },
+        getDirectionInGrid: function(neighbor) {
+            var xDiff = this.positionWithinGrid.x - neighbor.positionWithinGrid.x;
+            var yDiff = this.positionWithinGrid.y - neighbor.positionWithinGrid.y;
+
+            var isLeft = yDiff == 0 && xDiff == -1;
+            var isRight = yDiff == 0 && xDiff == 1;
+            var isTop = yDiff == -1 && xDiff == 0;
+            var isBottom = yDiff == 1 && xDiff == 0;
+
+            return {
+                isLeft: isLeft,
+                isRight: isRight,
+                isTop: isTop,
+                isBottom: isBottom
+
+            }
         },
         init: function (x, y, tileSizeInPixels, $viewport) {
             var Template = {
@@ -155,7 +195,6 @@
 
 
             this.positionWithinGrid = Object.create(Template);
-            this.coordinatesInPixel = Object.create(Template);
             this.correctCoordinatesInPixel = Object.create(Template);
 
             this.neighbors = [];
@@ -184,10 +223,9 @@
                         previousPosition = ui.originalPosition;
                     }
 
-                    var currentPosition = $(this).position();
+                    var currentPosition = that.$canvas.position();
                     var leftOffset = currentPosition.left - previousPosition.left;
                     var topOffset = currentPosition.top - previousPosition.top;
-
 
                     that.allConnectedTiles = [];
                     function traverse(o) {
@@ -200,15 +238,14 @@
                             });
                         }
                     }
-
                     traverse(that);
-
 
                     that.allConnectedTiles.forEach(function (tile) {
                         var $canvas = tile.$canvas;
                         var position = $canvas.position();
                         var left = position.left;
                         var top = position.top;
+
                         $canvas.css('left', left + leftOffset);
                         $canvas.css('top', top + topOffset);
                     });
@@ -217,7 +254,6 @@
                 },
                 stop: function (e, ui) {
                     $(this).data('previousLocation', null);
-                    that.coordinatesInPixel = null;
                     that.allConnectedTiles.forEach(function (tile) {
                         if (that !== tile) {
                             tile.moveToCorrectPositionRelativeTo(that);
@@ -225,6 +261,8 @@
                     });
 
                     $document.trigger('notifyConnectedTilesAmount', that.allConnectedTiles.length);
+
+                    that.closeToANeighbor();
                 }
             });
 
@@ -232,7 +270,7 @@
             this.$canvas.droppable({
                 tolerance: "pointer",
                 drop: function (event, ui) {
-                    that.coordinatesInPixel = that.$canvas.position();
+                    var coordinatesInPixel = that.$canvas.position();
                     var targetTile = that;
                     /**
                      * TODO: I really need to get my hands on the tile instead of only the canvas
@@ -245,7 +283,6 @@
             $viewport[0].appendChild(this.canvas);
             this.coordinatesInPixel = this.$canvas.position;
             this.bind();
-            this.coordinatesInPixel = null;
         }
     }
 
