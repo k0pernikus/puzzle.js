@@ -24,11 +24,11 @@
 
         <script src="bower_components/jquery/jquery.min.js"></script>
         <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
-        <script src="js/plugins.js"></script>
+        <script src="bower_components/console-polyfill/index.js"></script>
         <script src="js/puzzle.js"></script>
         <script type="text/javascript">
             function handleFileSelect(evt) {
-                evt.target.files
+                evt.target.files;
                 var files = evt.target.files; // FileList object
 
                 for (var i = 0, f; f = files[i]; i++) {
