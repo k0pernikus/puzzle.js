@@ -1,59 +1,12 @@
-<!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title></title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width">
-
-        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-        <link rel="stylesheet" href="bower_components/normalize-css/normalize.css">
-        <link rel="stylesheet" href="css/main.css">
-    </head>
-    <body>
-        <!--[if lt IE 7]>
-            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
-        <![endif]-->
-
-        <input type="file" id="files" name="files[]" multiple />
-        <output id="list"></output>
-
-        <script src="bower_components/jquery/jquery.min.js"></script>
-        <script src="bower_components/jquery-ui/ui/jquery-ui.js"></script>
-        <script src="bower_components/console-polyfill/index.js"></script>
-        <script src="js/puzzle.js"></script>
-        <script type="text/javascript">
-            function handleFileSelect(evt) {
-                evt.target.files;
-                var files = evt.target.files; // FileList object
-
-                for (var i = 0, f; f = files[i]; i++) {
-                    if (!f.type.match('image.*')) {
-                        continue;
-                    }
-
-                    var reader = new FileReader();
-                    reader.onload = (function (theFile) {
-                        return function (e) {
-                            var div = document.createElement('div');
-                            div.className = "puzzlejs_viewport";
-                            div.innerHTML = ['<img src="', e.target.result,
-                                '" title="', encodeURI(theFile.name), '"/>'].join('');
-                            $('#list')[0].insertBefore(div, null);
-
-                            window.puzzlejs.init($(div));
-                        };
-                    })(f);
-
-                    reader.readAsDataURL(f);
-                }
-            }
-
-            $('#files').on('change', handleFileSelect);
-        </script>
-    </body>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Puzzle</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>
