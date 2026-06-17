@@ -1,38 +1,35 @@
 import type { Vec2 } from "../geometry/vec2"
 import { sub } from "../geometry/vec2"
-import type { Piece } from "../puzzle/piece"
+import type { Cluster } from "../puzzle/board"
 
 const WHEEL_STEP = Math.PI / 24
 const KEY_STEP = Math.PI / 2
 
 export interface InteractionPorts {
   readonly canvas: HTMLCanvasElement
-  readonly pieces: Piece[]
   readonly toBoard: (clientX: number, clientY: number) => Vec2
-  readonly pick: (board: Vec2) => Piece | undefined
+  readonly pick: (board: Vec2) => Cluster | undefined
+  readonly raise: (cluster: Cluster) => void
+  readonly translate: (cluster: Cluster, delta: Vec2) => void
+  readonly rotate: (cluster: Cluster, center: Vec2, angle: number) => void
+  readonly settle: (cluster: Cluster) => void
   readonly requestRender: () => void
 }
 
 export function setupInteraction(ports: InteractionPorts): void {
-  let dragging: Piece | undefined
-  let grabOffset: Vec2 = { x: 0, y: 0 }
+  let dragging: Cluster | undefined
+  let last: Vec2 = { x: 0, y: 0 }
   let pointer: Vec2 = { x: 0, y: 0 }
-
-  const raise = (piece: Piece): void => {
-    const index = ports.pieces.indexOf(piece)
-    if (index < 0) {
-      return
-    }
-    ports.pieces.splice(index, 1)
-    ports.pieces.push(piece)
-  }
 
   const rotateActive = (delta: number): void => {
     const target = dragging ?? ports.pick(pointer)
     if (!target) {
       return
     }
-    target.rotation += delta
+    ports.rotate(target, pointer, delta)
+    if (!dragging) {
+      ports.settle(target)
+    }
     ports.requestRender()
   }
 
@@ -43,8 +40,8 @@ export function setupInteraction(ports: InteractionPorts): void {
       return
     }
     dragging = hit
-    grabOffset = sub(pointer, hit.translation)
-    raise(hit)
+    last = pointer
+    ports.raise(hit)
     ports.canvas.setPointerCapture(event.pointerId)
     ports.requestRender()
   })
@@ -54,7 +51,8 @@ export function setupInteraction(ports: InteractionPorts): void {
     if (!dragging) {
       return
     }
-    dragging.translation = sub(pointer, grabOffset)
+    ports.translate(dragging, sub(pointer, last))
+    last = pointer
     ports.requestRender()
   })
 
@@ -62,8 +60,11 @@ export function setupInteraction(ports: InteractionPorts): void {
     if (!dragging) {
       return
     }
+    const dropped = dragging
     dragging = undefined
     ports.canvas.releasePointerCapture(event.pointerId)
+    ports.settle(dropped)
+    ports.requestRender()
   }
   ports.canvas.addEventListener("pointerup", endDrag)
   ports.canvas.addEventListener("pointercancel", endDrag)

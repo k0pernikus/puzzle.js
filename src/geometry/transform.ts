@@ -1,5 +1,5 @@
 import type { Vec2 } from "./vec2"
-import { add, negate, rotate } from "./vec2"
+import { add, negate, rotate, sub } from "./vec2"
 
 export interface Rigid {
   readonly rotation: number
@@ -27,5 +27,19 @@ export function invert(transform: Rigid): Rigid {
   return {
     rotation,
     translation: rotate(negate(transform.translation), rotation),
+  }
+}
+
+export function rotateAround(center: Vec2, angle: number): Rigid {
+  return {
+    rotation: angle,
+    translation: sub(center, rotate(center, angle)),
+  }
+}
+
+export function placing(point: Vec2, target: Vec2, rotation: number): Rigid {
+  return {
+    rotation,
+    translation: sub(target, rotate(point, rotation)),
   }
 }

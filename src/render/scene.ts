@@ -1,76 +1,86 @@
+import { apply, invert } from "../geometry/transform"
 import type { Vec2 } from "../geometry/vec2"
-import { boardToOutline, type Piece } from "../puzzle/piece"
+import type { Board, Cluster } from "../puzzle/board"
+import type { Piece } from "../puzzle/piece"
 import { buildPiecePath } from "./piece-path"
 
-const SEAM_STYLE = "rgba(0, 0, 0, 0.35)"
+const SEAM_STYLE = "rgba(0, 0, 0, 0.4)"
 
 export function buildPathCache(pieces: readonly Piece[]): Map<number, Path2D> {
   return new Map(pieces.map((piece) => [piece.id, buildPiecePath(piece.outline)]))
 }
 
-export function renderScene(
+export function renderBoard(
   context: CanvasRenderingContext2D,
   image: CanvasImageSource,
-  pieces: readonly Piece[],
+  board: Board,
   paths: ReadonlyMap<number, Path2D>,
-  offset: Vec2,
   puzzleWidth: number,
   puzzleHeight: number,
 ): void {
-  for (const piece of pieces) {
-    const path = paths.get(piece.id)
-    if (!path) {
-      continue
-    }
+  for (const cluster of board.clusters) {
     context.save()
-    context.translate(offset.x + piece.translation.x, offset.y + piece.translation.y)
-    context.rotate(piece.rotation)
-    context.translate(-piece.pivot.x, -piece.pivot.y)
+    context.translate(cluster.pose.translation.x, cluster.pose.translation.y)
+    context.rotate(cluster.pose.rotation)
 
-    context.save()
-    context.clip(path)
-    context.drawImage(image, 0, 0, puzzleWidth, puzzleHeight)
-    context.restore()
+    for (const id of cluster.members) {
+      const path = paths.get(id)
+      if (!path) {
+        continue
+      }
+      context.save()
+      context.clip(path)
+      context.drawImage(image, 0, 0, puzzleWidth, puzzleHeight)
+      context.restore()
+    }
 
     context.strokeStyle = SEAM_STYLE
     context.lineWidth = 1
-    context.stroke(path)
+    for (const id of cluster.members) {
+      const path = paths.get(id)
+      if (!path) {
+        continue
+      }
+      context.stroke(path)
+    }
     context.restore()
   }
 }
 
-function topHit(
+function topCluster(
   context: CanvasRenderingContext2D,
-  pieces: readonly Piece[],
+  board: Board,
   paths: ReadonlyMap<number, Path2D>,
   boardPoint: Vec2,
-): Piece | undefined {
-  for (let index = pieces.length - 1; index >= 0; index--) {
-    const piece = pieces[index]
-    if (!piece) {
+): Cluster | undefined {
+  for (let index = board.clusters.length - 1; index >= 0; index--) {
+    const cluster = board.clusters[index]
+    if (!cluster) {
       continue
     }
-    const path = paths.get(piece.id)
-    if (!path) {
-      continue
-    }
-    const local = boardToOutline(piece, boardPoint)
-    if (context.isPointInPath(path, local.x, local.y)) {
-      return piece
+    const local = apply(invert(cluster.pose), boardPoint)
+    for (const id of cluster.members) {
+      const path = paths.get(id)
+      if (!path) {
+        continue
+      }
+      if (context.isPointInPath(path, local.x, local.y)) {
+        return cluster
+      }
     }
   }
   return undefined
 }
 
-export function hitTest(
+export function pickCluster(
   context: CanvasRenderingContext2D,
-  pieces: readonly Piece[],
+  board: Board,
   paths: ReadonlyMap<number, Path2D>,
   boardPoint: Vec2,
-): Piece | undefined {
+): Cluster | undefined {
   context.save()
   context.setTransform(1, 0, 0, 1, 0, 0)
-  const hit = topHit(context, pieces, paths, boardPoint)
+  const hit = topCluster(context, board, paths, boardPoint)
   context.restore()
   return hit
 }
